@@ -1,0 +1,12 @@
+Task0:
+  completed: false
+  name: Coding
+  points: 100
+Task1:
+  completed: false
+  name: Cleaning
+  points: 150
+Task2:
+  completed: false
+  name: Drawing
+  points: 50

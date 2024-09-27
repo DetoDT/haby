@@ -1,0 +1,26 @@
+'2024-09-25':
+  date: '2024-09-27'
+  score: 200
+  tasks:
+    Task0:
+      completed: true
+      name: Coding
+      points: 100
+    Task1:
+      completed: true
+      name: Cleaning
+      points: 100
+
+
+'2024-09-26':
+  date: 2024-09-26
+  score: 0
+  tasks:
+    Task0:
+      completed: false
+      name: Coding
+      points: 100
+    Task1:
+      completed: false
+      name: Cleaning
+      points: 100

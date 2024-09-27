@@ -1,3 +1,6 @@
+# TODO: gui
+# TODO: plot graph
+
 import yaml
 import datetime
 
@@ -7,6 +10,7 @@ with open('tasks.yml', 'r') as file:
 
 current_date = datetime.date.today()
 print(current_date)
+
 
 # Main object of the project is the Task: it contains
 # the name, the points and the daily status of the class
@@ -37,22 +41,68 @@ class Task():
     def getName(self):
         return self.name
 
-# # TODO: daily score update
-# def changeScore(task):
-#     if task.completed == True:
-#         score += task.points
-#     else:
-#         score -= task.points
+
+class Daily_Task():
+    def __init__(self, score, tasks, date):
+        self.score = score
+        self.tasks = tasks
+        self.date = date
+
+    def setScore(self, score):
+        self.score = score
+
+    def setTasks(self, tasks):
+        self.tasks = tasks
+
+    def setDate(self, date):
+        self.date = date
+
+    def getScore(self):
+        return self.score
+
+    def getTasks(self):
+        return self.tasks
+
+    def getDate(self):
+        return self.date
 
 
 def check_date():
     with open("date_of_last_save.yml", "r") as file:
         last_date = yaml.safe_load(file)
+    file.close()
 
     if current_date > last_date:
-        return True
-    return False
+        return last_date
+    return None
 
+
+def save_score(score, tasks, date):
+    daily_task = Daily_Task(score, tasks, date)
+    with open('recap_days.yml', 'a+') as file:
+        data = yaml.safe_load(file)
+        if data is None:
+            data = {}
+        if date not in data.keys():
+            data[f'{date}'] = {'score': daily_task.getScore(
+            ), 'date': daily_task.getDate(), 'tasks': {}}
+            j = 0
+            for i in tasks:
+                data[f'{date}']['tasks'][f'Task{j}'] = {
+                    'name': i.getName(), 'points': i.getPoints(), 'completed': i.getCompleted()}
+                j += 1
+            yaml.dump(data, file)
+            file.close()
+        else:
+            file.close()
+
+
+def find_score_by_date(date):
+    with open('recap_days.yml', 'r') as file:
+        data = yaml.safe_load(file)
+        score = data[date]['score']
+        file.close()
+    return score
 
 
 # create a task and assign name and points
@@ -75,7 +125,7 @@ def save(taskList):
         yaml.dump(dict, file)
 
     file.close()
-    with open ('date_of_last_save.yml', 'w') as file:
+    with open('date_of_last_save.yml', 'w') as file:
         yaml.dump(current_date, file)
 
     file.close
@@ -118,22 +168,35 @@ def performAction(action, taskList, score):
 
             print('\n')
             return False, score
+
+        case 'f':
+            print()
+            with open('recap_days.yml', 'r') as file:
+                data = yaml.safe_load(file)
+                if data is None:
+                    print("No saved score found")
+                    return False, score
+                print("Choose one of the dates: below")
+                for k in data:
+                    print(f'- {k}')
+                date = input()
+                old_score = find_score_by_date(date)
+                print(old_score)
+                file.close()
+            return False, score
+
         case 'q':
             save(taskList)
             return True, score
-
-# TODO: daily tracking
-# TODO: gui
-# TODO: plot graph
 
 
 def main():
     score = 0
     # exampleTask = Task("Coding", 100, False)
-    actionList1 = ['l', 'a', 's', 'q']
+    actionList1 = ['l', 'a', 's', 'f', 'q']
     taskList = []
 
-    if tasks != None:
+    if tasks is not None:
         for k in tasks:
             # task = Task(tasks[k][0], tasks[k][1], tasks[k][2])
             attributes = tasks[k]
@@ -144,19 +207,22 @@ def main():
             taskList.append(loadedTask)
     file.close()
 
-    different_date = check_date()
-    if different_date:
-        score = 0;
+    last_date = check_date()
+    print(last_date)
+    if last_date is not None:
+        print("Saving past day data...")
+        save_score(score, taskList, last_date)
+        print("Done!\n")
+        score = 0
         for k in taskList:
             k.setNotCompleted()
 
-
     print("Haby.\n")
-
     while True:
         print('--------------------------------------------------------------')
         print(f'Score: {score}')
-        print("l: list tasks | a: add task | s: set completed | q: quit")
+        print("l: list tasks         | a: add task           | s: set completed |")
+        print("f: find score by date | q: quit")
         action = input()
         if action in actionList1:
             quit, score = performAction(action, taskList, score)

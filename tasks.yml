@@ -2,3 +2,7 @@ Task0:
   completed: false
   name: Coding
   points: 100
+Task1:
+  completed: false
+  name: Cleaning
+  points: 100

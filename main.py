@@ -1,9 +1,12 @@
 import yaml
+import datetime
 
 
 with open('tasks.yml', 'r') as file:
     tasks = yaml.safe_load(file)
 
+current_date = datetime.date.today()
+print(current_date)
 
 # Main object of the project is the Task: it contains
 # the name, the points and the daily status of the class
@@ -42,6 +45,16 @@ class Task():
 #         score -= task.points
 
 
+def check_date():
+    with open("date_of_last_save.yml", "r") as file:
+        last_date = yaml.safe_load(file)
+
+    if current_date > last_date:
+        return True
+    return False
+
+
+
 # create a task and assign name and points
 def createTask():
     taskName = input("Name of the task: ")
@@ -62,6 +75,10 @@ def save(taskList):
         yaml.dump(dict, file)
 
     file.close()
+    with open ('date_of_last_save.yml', 'w') as file:
+        yaml.dump(current_date, file)
+
+    file.close
 
     print("Saved!")
 
@@ -105,7 +122,6 @@ def performAction(action, taskList, score):
             save(taskList)
             return True, score
 
-# TODO: save config file
 # TODO: daily tracking
 # TODO: gui
 # TODO: plot graph
@@ -117,13 +133,23 @@ def main():
     actionList1 = ['l', 'a', 's', 'q']
     taskList = []
 
-    for k in tasks:
-        # task = Task(tasks[k][0], tasks[k][1], tasks[k][2])
-        attributes = tasks[k]
-        loadedTask = Task(
-            attributes['name'], attributes['points'], attributes['completed'])
-        taskList.append(loadedTask)
+    if tasks != None:
+        for k in tasks:
+            # task = Task(tasks[k][0], tasks[k][1], tasks[k][2])
+            attributes = tasks[k]
+            loadedTask = Task(
+                attributes['name'], attributes['points'], attributes['completed'])
+            if loadedTask.getCompleted():
+                score += loadedTask.getPoints()
+            taskList.append(loadedTask)
     file.close()
+
+    different_date = check_date()
+    if different_date:
+        score = 0;
+        for k in taskList:
+            k.setNotCompleted()
+
 
     print("Haby.\n")
 

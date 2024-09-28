@@ -1,8 +1,24 @@
 Task0:
-  completed: false
+  completed: true
   name: Coding
   points: 100
 Task1:
-  completed: false
+  completed: true
   name: Cleaning
+  points: 150
+Task2:
+  completed: false
+  name: Study
+  points: 200
+Task3:
+  completed: false
+  name: Take out trash
   points: 100
+Task4:
+  completed: false
+  name: Go to university
+  points: 150
+Task5:
+  completed: false
+  name: Gym
+  points: 200

@@ -24,3 +24,23 @@
       completed: false
       name: Cleaning
       points: 100
+'2024-09-27':
+  date: 2024-09-27
+  score: 200
+  tasks:
+    Task0:
+      completed: true
+      name: Coding
+      points: 100
+    Task1:
+      completed: false
+      name: Cleaning
+      points: 100
+    Task2:
+      completed: false
+      name: Study
+      points: 200
+    Task3:
+      completed: true
+      name: Go to Uni
+      points: 100

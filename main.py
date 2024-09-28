@@ -1,15 +1,14 @@
+# TODO: error handling
+# TODO: improve plot
 # TODO: gui
-# TODO: plot graph
 
 import yaml
 import datetime
+import matplotlib.pyplot as plt
+import numpy as np
 
-
-with open('tasks.yml', 'r') as file:
-    tasks = yaml.safe_load(file)
-
+plt.style.use('_mpl-gallery')
 current_date = datetime.date.today()
-print(current_date)
 
 
 # Main object of the project is the Task: it contains
@@ -66,6 +65,50 @@ class Daily_Task():
     def getDate(self):
         return self.date
 
+# unused for now, could be useful later
+
+
+def draw_tasks_plot(taskList):
+    x_array = []
+    y_array = []
+    for i in range(0, len(taskList)):
+        x_array.append(i)
+
+    x_labels = []
+    for t in taskList:
+        y_array.append(t.getPoints())
+        x_labels.append(t.getName())
+
+    x = np.array(x_array)
+    y = np.array(y_array)
+    plt.xticks(x, x_labels)
+    plt.bar(x, y)
+    plt.show()
+
+
+def draw_daily_plot(today_score):
+    x_array = []
+    y_array = []
+    x_labels = []
+    with open('recap_days.yml', 'r') as file:
+        data = yaml.safe_load(file)
+    file.close()
+    i = 0
+    for date in data:
+        x_labels.append(date)
+        x_array.append(i)
+        i += 1
+        y_array.append(data[date]['score'])
+
+    x_labels.append("Today")
+    x_array.append(i)
+    y_array.append(today_score)
+    x = np.array(x_array)
+    y = np.array(y_array)
+    plt.xticks(x, x_labels)
+    plt.bar(x, y)
+    plt.show()
+
 
 def check_date():
     with open("date_of_last_save.yml", "r") as file:
@@ -107,13 +150,14 @@ def find_score_by_date(date):
 
 # create a task and assign name and points
 def createTask():
-    taskName = input("Name of the task: ")
-    taskPoints = int(input("Points: "))
+    print("Name of the task: ")
+    taskName = input("> ")
+    print("Points: ")
+    taskPoints = int(input("> "))
     return Task(taskName, taskPoints, False)
 
 
 def save(taskList):
-    print("Saving...")
     i = 0
     dict = {}
     for task in taskList:
@@ -129,8 +173,6 @@ def save(taskList):
         yaml.dump(current_date, file)
 
     file.close
-
-    print("Saved!")
 
 
 def performAction(action, taskList, score):
@@ -166,34 +208,80 @@ def performAction(action, taskList, score):
                 taskList[index].setCompleted()
                 score += taskList[index].getPoints()
 
-            print('\n')
-            return False, score
-
-        case 'f':
             print()
-            with open('recap_days.yml', 'r') as file:
-                data = yaml.safe_load(file)
-                if data is None:
-                    print("No saved score found")
-                    return False, score
-                print("Choose one of the dates: below")
-                for k in data:
-                    print(f'- {k}')
-                date = input()
-                old_score = find_score_by_date(date)
-                print(old_score)
-                file.close()
             return False, score
 
+        case 'e':
+            print()
+            print("Do you want to delete the task or change the name/points?")
+            choice = input("d/c: ")
+            while True:
+                if choice == 'd':
+                    print("Select task by indicating number: ")
+                    for i in range(1, len(taskList)+1):
+                        print(f'{i}. {taskList[i-1].getName()}')
+                    index = int(input("\nEnter number: ")) - 1
+                    taskList.pop(index)
+                    save(taskList)
+                    break
+
+                elif choice == 'c':
+                    print("Select task by indicating number: ")
+                    for i in range(1, len(taskList)+1):
+                        print(f'{i}. {taskList[i-1].getName()}')
+                    index = int(input("\nEnter number: ")) - 1
+                    new_name = input(
+                        "Enter new name (leave blank to keep the old value): ")
+                    new_points = input(
+                        "Enter new points (leave blank to keep the old value): ")
+                    if new_name != '':
+                        taskList[index].setName(new_name)
+                    if new_points != '':
+                        new_points = int(new_points)
+                        point_diff = new_points - taskList[index].getPoints()
+                        taskList[index].setPoints(new_points)
+                    if taskList[index].getCompleted() and new_points != '':
+                        score += point_diff
+                    break
+                else:
+                    print("Retry")
+            print()
+            return False, score
+
+        case 'p':
+            draw_daily_plot(score)
+            return False, score
+
+        # case 'f':
+        #     print()
+        #     with open('recap_days.yml', 'r') as file:
+        #         data = yaml.safe_load(file)
+        #         if data is None:
+        #             print("No saved score found")
+        #             return False, score
+        #         print("Choose one of the dates: below")
+        #         for k in data:
+        #             print(f'- {k}')
+        #         date = input("> ")
+        #         old_score = find_score_by_date(date)
+        #         print(f'Score: {old_score}')
+        #         file.close()
+        #     return False, score
+        #
         case 'q':
+            print("Saving...")
             save(taskList)
+            print("Saved!")
             return True, score
 
 
 def main():
+    with open('tasks.yml', 'r') as file:
+        tasks = yaml.safe_load(file)
+
     score = 0
     # exampleTask = Task("Coding", 100, False)
-    actionList1 = ['l', 'a', 's', 'f', 'q']
+    actionList1 = ['l', 'a', 's', 'e', 'p', 'q']
     taskList = []
 
     if tasks is not None:
@@ -208,7 +296,6 @@ def main():
     file.close()
 
     last_date = check_date()
-    print(last_date)
     if last_date is not None:
         print("Saving past day data...")
         save_score(score, taskList, last_date)
@@ -219,11 +306,11 @@ def main():
 
     print("Haby.\n")
     while True:
-        print('--------------------------------------------------------------')
+        print('------------------------------------------------------------------------')
         print(f'Score: {score}')
-        print("l: list tasks         | a: add task           | s: set completed |")
-        print("f: find score by date | q: quit")
-        action = input()
+        print("l: list tasks         | a: add task           | s: set completed")
+        print("p: plot scores        | e: edit task          | q: quit")
+        action = input("> ")
         if action in actionList1:
             quit, score = performAction(action, taskList, score)
             if quit:

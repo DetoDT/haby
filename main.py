@@ -331,12 +331,27 @@ def main():
         for k in taskList:
             k.setNotCompleted()
 
-    print("Haby.\n")
+    logo = r"""
+ ██╗  ██╗ █████╗ ██████╗ ██╗   ██╗
+ ██║  ██║██╔══██╗██╔══██╗╚██╗ ██╔╝
+ ███████║███████║██████╔╝ ╚████╔╝ 
+ ██╔══██║██╔══██║██╔══██╗  ╚██╔╝  
+ ██║  ██║██║  ██║██████╔╝   ██║   
+ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝    ╚═╝   
+                                  """
+    print(logo)
+
+    actions = r"""
+ ████████████████████████████████████████████████████████████
+ ██                                                        ██
+ ██  l:list tasks   | a: add task     | s:set completed    ██
+ ██  p: plot scores | e: edit task    | q:quit             ██
+ ██                                                        ██
+ ████████████████████████████████████████████████████████████"""
     while True:
-        print('--------------------------------------------------------------')
         print(f'Score: {score}')
-        print("l: list tasks    | a: add task      | s: set completed")
-        print("p: plot scores   | e: edit task     | q: quit")
+        print(actions)
+        print()
         action = input("> ")
         if action in actionList1:
             quit, score = performAction(action, taskList, score)

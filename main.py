@@ -1,4 +1,6 @@
 # TODO: error handling
+# TODO: check for days when the app has not been opened to set score to 0
+# TODO: list tasks by alphabetical order (maybe)
 # TODO: improve plot
 # TODO: gui
 
@@ -41,6 +43,8 @@ class Task():
         return self.name
 
 
+# this class contains the list of tasks with their status of a particular date
+# and the total score for that day
 class Daily_Task():
     def __init__(self, score, tasks, date):
         self.score = score
@@ -65,9 +69,9 @@ class Daily_Task():
     def getDate(self):
         return self.date
 
+
 # unused for now, could be useful later
-
-
+# draws a graph of all the tasks on the x and their relative points
 def draw_tasks_plot(taskList):
     x_array = []
     y_array = []
@@ -86,6 +90,7 @@ def draw_tasks_plot(taskList):
     plt.show()
 
 
+# draws a plot to compare the score obtained day by day
 def draw_daily_plot(today_score):
     x_array = []
     y_array = []
@@ -106,10 +111,13 @@ def draw_daily_plot(today_score):
     x = np.array(x_array)
     y = np.array(y_array)
     plt.xticks(x, x_labels)
-    plt.bar(x, y)
+    plt.plot(x, y)
     plt.show()
 
 
+# compares today date with the date of the last save
+# if it's a different day returns the date of last save to use it
+# otherwise returns None
 def check_date():
     with open("date_of_last_save.yml", "r") as file:
         last_date = yaml.safe_load(file)
@@ -120,6 +128,7 @@ def check_date():
     return None
 
 
+# saves the score and tasks progress of each day of use
 def save_score(score, tasks, date):
     daily_task = Daily_Task(score, tasks, date)
     with open('recap_days.yml', 'a+') as file:
@@ -140,6 +149,7 @@ def save_score(score, tasks, date):
             file.close()
 
 
+# unused, finds the score of a given day
 def find_score_by_date(date):
     with open('recap_days.yml', 'r') as file:
         data = yaml.safe_load(file)
@@ -157,6 +167,7 @@ def createTask():
     return Task(taskName, taskPoints, False)
 
 
+# saves the current status of the tasks for today
 def save(taskList):
     i = 0
     dict = {}
@@ -172,11 +183,13 @@ def save(taskList):
     with open('date_of_last_save.yml', 'w') as file:
         yaml.dump(current_date, file)
 
-    file.close
+    file.close()
 
 
+# manages what to do when users chooses what he wants to do
 def performAction(action, taskList, score):
     match action:
+        # list all tasks
         case 'l':
             print("\n")
             for i in taskList:
@@ -188,6 +201,7 @@ def performAction(action, taskList, score):
             print("\n")
             return False, score
 
+        # add a new task to the list
         case 'a':
             print('\n')
             task = createTask()
@@ -195,6 +209,8 @@ def performAction(action, taskList, score):
             print('\n')
             return False, score
 
+        # change a task status to completed or not completed
+        # and changes score accordingly
         case 's':
             print('\n')
             print("Select task by indicating number: ")
@@ -211,6 +227,7 @@ def performAction(action, taskList, score):
             print()
             return False, score
 
+        # edit a task (delete, change name, change score)
         case 'e':
             print()
             print("Do you want to delete the task or change the name/points?")
@@ -231,9 +248,9 @@ def performAction(action, taskList, score):
                         print(f'{i}. {taskList[i-1].getName()}')
                     index = int(input("\nEnter number: ")) - 1
                     new_name = input(
-                        "Enter new name (leave blank to keep the old value): ")
+                        "> New name (leave blank to keep the old value): ")
                     new_points = input(
-                        "Enter new points (leave blank to keep the old value): ")
+                        "> New points(leave blank to keep the old value): ")
                     if new_name != '':
                         taskList[index].setName(new_name)
                     if new_points != '':
@@ -248,10 +265,12 @@ def performAction(action, taskList, score):
             print()
             return False, score
 
+        # draw a plot of daily scores
         case 'p':
             draw_daily_plot(score)
             return False, score
 
+        # # find the score obtained on specific day
         # case 'f':
         #     print()
         #     with open('recap_days.yml', 'r') as file:
@@ -267,12 +286,18 @@ def performAction(action, taskList, score):
         #         print(f'Score: {old_score}')
         #         file.close()
         #     return False, score
-        #
+
+        # save and quit
         case 'q':
             print("Saving...")
             save(taskList)
             print("Saved!")
             return True, score
+
+        # manages mistype
+        case _:
+            print("Retry.")
+            return False, score
 
 
 def main():
@@ -289,7 +314,9 @@ def main():
             # task = Task(tasks[k][0], tasks[k][1], tasks[k][2])
             attributes = tasks[k]
             loadedTask = Task(
-                attributes['name'], attributes['points'], attributes['completed'])
+                attributes['name'],
+                attributes['points'],
+                attributes['completed'])
             if loadedTask.getCompleted():
                 score += loadedTask.getPoints()
             taskList.append(loadedTask)
@@ -306,10 +333,10 @@ def main():
 
     print("Haby.\n")
     while True:
-        print('------------------------------------------------------------------------')
+        print('--------------------------------------------------------------')
         print(f'Score: {score}')
-        print("l: list tasks         | a: add task           | s: set completed")
-        print("p: plot scores        | e: edit task          | q: quit")
+        print("l: list tasks    | a: add task      | s: set completed")
+        print("p: plot scores   | e: edit task     | q: quit")
         action = input("> ")
         if action in actionList1:
             quit, score = performAction(action, taskList, score)

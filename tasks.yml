@@ -3,7 +3,7 @@ Task0:
   name: Coding
   points: 100
 Task1:
-  completed: true
+  completed: false
   name: Cleaning
   points: 150
 Task2:

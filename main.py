@@ -8,9 +8,20 @@ import yaml
 import datetime
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 plt.style.use('_mpl-gallery')
 current_date = datetime.date.today()
+
+
+# Create config files if they don't exist
+def create_config():
+    if not os.path.exists('./tasks.yml'):
+        os.mknod('./tasks.yml')
+    if not os.path.exists('./recap_days.yml'):
+        os.mknod('./recap_days.yml')
+    if not os.path.exists('./date_of_last_save.yml'):
+        os.mknod('./date_of_last_save.yml')
 
 
 # Main object of the project is the Task: it contains
@@ -98,12 +109,14 @@ def draw_daily_plot(today_score):
     with open('recap_days.yml', 'r') as file:
         data = yaml.safe_load(file)
     file.close()
-    i = 0
-    for date in data:
-        x_labels.append(date)
-        x_array.append(i)
-        i += 1
-        y_array.append(data[date]['score'])
+
+    i=0
+    if data is not None:
+        for date in data:
+            x_labels.append(date)
+            x_array.append(i)
+            i += 1
+            y_array.append(data[date]['score'])
 
     x_labels.append("Today")
     x_array.append(i)
@@ -122,6 +135,9 @@ def check_date():
     with open("date_of_last_save.yml", "r") as file:
         last_date = yaml.safe_load(file)
     file.close()
+
+    if last_date is None:
+        return None
 
     if current_date > last_date:
         return last_date
@@ -212,6 +228,10 @@ def performAction(action, taskList, score):
         # change a task status to completed or not completed
         # and changes score accordingly
         case 's':
+            if not taskList:
+                print("No task found.")
+                print()
+                return False, score
             print('\n')
             print("Select task by indicating number: ")
             for i in range(1, len(taskList)+1):
@@ -229,6 +249,10 @@ def performAction(action, taskList, score):
 
         # edit a task (delete, change name, change score)
         case 'e':
+            if not taskList:
+                print("No task found.")
+                print()
+                return False, score
             print()
             print("Do you want to delete the task or change the name/points?")
             choice = input("d/c: ")
@@ -301,6 +325,7 @@ def performAction(action, taskList, score):
 
 
 def main():
+    create_config()
     with open('tasks.yml', 'r') as file:
         tasks = yaml.safe_load(file)
 

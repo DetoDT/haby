@@ -155,10 +155,13 @@ def save_score(score, tasks, date):
             data[f'{date}'] = {'score': daily_task.getScore(
             ), 'date': daily_task.getDate(), 'tasks': {}}
             j = 0
-            for i in tasks:
-                data[f'{date}']['tasks'][f'Task{j}'] = {
-                    'name': i.getName(), 'points': i.getPoints(), 'completed': i.getCompleted()}
-                j += 1
+            if tasks is not None:
+                for i in tasks:
+                    data[f'{date}']['tasks'][f'Task{j}'] = {
+                        'name': i.getName(), 'points': i.getPoints(), 'completed': i.getCompleted()}
+                    j += 1
+            else:
+                data[f'{date}']['score'] = 0;
             yaml.dump(data, file)
             file.close()
         else:
@@ -349,6 +352,11 @@ def main():
 
     last_date = check_date()
     if last_date is not None:
+        delta = current_date - last_date
+        for i in range(delta.days):
+            day = last_date + datetime.timedelta(days=i)
+            if day != last_date:
+                save_score(0, None, day)
         print("Saving past day data...")
         save_score(score, taskList, last_date)
         print("Done!\n")
